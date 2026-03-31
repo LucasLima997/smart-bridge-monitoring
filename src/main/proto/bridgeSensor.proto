@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "distsys.smartbridge.grpc";
+option java_outer_classname = "BridgeSensorProto";
+
+package bridge;
+
+service BridgeSensorService {
+  rpc UploadReadings(stream UploadReadingsReq) returns (UploadReadingsRes);
+  rpc ValidateReading(ValidateReadingReq) returns (ValidateReadingRes);
+}
+
+message UploadReadingsReq {
+  string bridge_id = 1;
+  string sensor_id = 2;
+  SensorType sensor_type = 3;
+  double value = 4;
+  string unit = 5;
+  string timestamp = 6;
+}
+
+message UploadReadingsRes {
+  string bridge_id = 1;
+  int32 total_received = 2;
+  int32 accepted = 3;
+  int32 rejected = 4;
+  double min_value = 5;
+  double max_value = 6;
+  string status = 7;
+}
+
+message ValidateReadingReq {
+  string bridge_id = 1;
+  string sensor_id = 2;
+  SensorType sensor_type = 3;
+  double value = 4;
+  string unit = 5;
+}
+
+message ValidateReadingRes {
+  bool is_valid = 1;
+  string message = 2;
+}
+
+enum SensorType {
+  SENSOR_TYPE_UNSPECIFIED = 0;
+  STRAIN = 1;
+  VIBRATION = 2;
+  TEMPERATURE = 3;
+  TILT = 4;
+}

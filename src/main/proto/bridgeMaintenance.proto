@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "distsys.smartbridge.grpc";
+option java_outer_classname = "BridgeMaintenanceProto";
+
+package bridge;
+
+service BridgeMaintenanceService {
+  rpc CreateWorkOrder(CreateWorkOrderReq) returns (CreateWorkOrderRes);
+  rpc TriageWorkOrder(stream TriageWorkOrderReq) returns (stream TriageWorkOrderRes);
+}
+
+message CreateWorkOrderReq {
+  string bridge_id = 1;
+  string issue_code = 2;
+  string description = 3;
+  Priority priority = 4;
+  string requested_by = 5;
+}
+
+message CreateWorkOrderRes {
+  string work_order_id = 1;
+  string bridge_id = 2;
+  WorkOrderStatus status = 3;
+  string created_at = 4;
+  string message = 5;
+}
+
+message TriageWorkOrderReq {
+  oneof payload {
+    SubscribeTriage subscribe = 1;
+    StatusUpdate status_update = 2;
+    AddComment comment = 3;
+  }
+}
+
+message TriageWorkOrderRes {
+  oneof payload {
+    TriageMessage message = 1;
+    WorkOrderEvent event = 2;
+  }
+}
+
+message SubscribeTriage {
+  string bridge_id = 1;
+}
+
+message StatusUpdate {
+  string work_order_id = 1;
+  WorkOrderStatus new_status = 2;
+}
+
+message AddComment {
+  string work_order_id = 1;
+  string author = 2;
+  string text = 3;
+  string timestamp = 4;
+}
+
+message TriageMessage {
+  string text = 1;
+  string timestamp = 2;
+}
+
+message WorkOrderEvent {
+  string work_order_id = 1;
+  WorkOrderStatus status = 2;
+  string note = 3;
+  string timestamp = 4;
+}
+
+enum Priority {
+  PRIORITY_UNSPECIFIED = 0;
+  P4_LOW = 1;
+  P3_MEDIUM = 2;
+  P2_HIGH = 3;
+  P1_CRITICAL = 4;
+}
+
+enum WorkOrderStatus {
+  WORK_ORDER_STATUS_UNSPECIFIED = 0;
+  OPEN = 1;
+  IN_PROGRESS = 2;
+  CLOSED = 3;
+}

@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "distsys.smartbridge.grpc";
+option java_outer_classname = "BridgeHealthProto";
+
+package bridge;
+
+service BridgeHealthService {
+  rpc GetHealthStatus(GetHealthStatusReq) returns (GetHealthStatusRes);
+  rpc SubscribeAlerts(SubscribeAlertsReq) returns (stream SubscribeAlertsRes);
+}
+
+message GetHealthStatusReq {
+  string bridge_id = 1;
+}
+
+message GetHealthStatusRes {
+  string bridge_id = 1;
+  double health_score = 2;
+  RiskLevel risk_level = 3;
+  string recommendation = 4;
+  string computed_at = 5;
+}
+
+message SubscribeAlertsReq {
+  string bridge_id = 1;
+}
+
+message SubscribeAlertsRes {
+  string bridge_id = 1;
+  RiskLevel risk_level = 2;
+  string alert_code = 3;
+  string details = 4;
+  string timestamp = 5;
+}
+
+enum RiskLevel {
+  RISK_LEVEL_UNSPECIFIED = 0;
+  LOW = 1;
+  MEDIUM = 2;
+  HIGH = 3;
+  CRITICAL = 4;
+}
