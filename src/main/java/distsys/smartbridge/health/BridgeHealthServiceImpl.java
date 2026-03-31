@@ -32,7 +32,49 @@ public class BridgeHealthServiceImpl extends BridgeHealthServiceGrpc.BridgeHealt
     }
 
     @Override
-    public void subscribeAlerts(SubscribeAlertsReq request, StreamObserver<SubscribeAlertsRes> responseObserver) {
+public void subscribeAlerts(SubscribeAlertsReq request, StreamObserver<SubscribeAlertsRes> responseObserver) {
+    String bridgeId = request.getBridgeId();
+
+    try {
+        SubscribeAlertsRes alert1 = SubscribeAlertsRes.newBuilder()
+                .setBridgeId(bridgeId)
+                .setRiskLevel(RiskLevel.MEDIUM)
+                .setAlertCode("TEMP_WARNING")
+                .setDetails("Temperature is approaching the warning threshold")
+                .setTimestamp(LocalDateTime.now().toString())
+                .build();
+
+        responseObserver.onNext(alert1);
+
+        Thread.sleep(1000);
+
+        SubscribeAlertsRes alert2 = SubscribeAlertsRes.newBuilder()
+                .setBridgeId(bridgeId)
+                .setRiskLevel(RiskLevel.HIGH)
+                .setAlertCode("VIB_SPIKE")
+                .setDetails("Vibration exceeded safe threshold")
+                .setTimestamp(LocalDateTime.now().toString())
+                .build();
+
+        responseObserver.onNext(alert2);
+
+        Thread.sleep(1000);
+
+        SubscribeAlertsRes alert3 = SubscribeAlertsRes.newBuilder()
+                .setBridgeId(bridgeId)
+                .setRiskLevel(RiskLevel.CRITICAL)
+                .setAlertCode("TILT_CRITICAL")
+                .setDetails("Tilt angle reached critical level")
+                .setTimestamp(LocalDateTime.now().toString())
+                .build();
+
+        responseObserver.onNext(alert3);
         responseObserver.onCompleted();
+
+    } catch (InterruptedException e) {
+        responseObserver.onError(e);
+        Thread.currentThread().interrupt();
     }
 }
+    }
+
