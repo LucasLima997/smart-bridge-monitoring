@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "distsys.smartbridge.grpc";
+option java_outer_classname = "NamingProto";
+
+package naming;
+
+service NamingService {
+  rpc RegisterService(RegisterServiceReq) returns (RegisterServiceRes);
+  rpc DiscoverService(DiscoverServiceReq) returns (DiscoverServiceRes);
+  rpc ListServices(ListServicesReq) returns (ListServicesRes);
+}
+
+message RegisterServiceReq {
+  string service_name = 1;
+  string host = 2;
+  int32 port = 3;
+  string description = 4;
+}
+
+message RegisterServiceRes {
+  bool success = 1;
+  string message = 2;
+}
+
+message DiscoverServiceReq {
+  string service_name = 1;
+}
+
+message DiscoverServiceRes {
+  bool found = 1;
+  string service_name = 2;
+  string host = 3;
+  int32 port = 4;
+  string description = 5;
+}
+
+message ListServicesReq {
+}
+
+message ServiceInfo {
+  string service_name = 1;
+  string host = 2;
+  int32 port = 3;
+  string description = 4;
+}
+
+message ListServicesRes {
+  repeated ServiceInfo services = 1;
+}
