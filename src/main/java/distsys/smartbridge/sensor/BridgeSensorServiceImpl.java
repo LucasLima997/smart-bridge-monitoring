@@ -11,19 +11,56 @@ import io.grpc.stub.StreamObserver;
 public class BridgeSensorServiceImpl extends BridgeSensorServiceGrpc.BridgeSensorServiceImplBase {
 
     @Override
-    public void validateReading(ValidateReadingReq request, StreamObserver<ValidateReadingRes> responseObserver) {
-        boolean valid = isReadingValid(request.getSensorType(), request.getValue());
+public void validateReading(ValidateReadingReq request, StreamObserver<ValidateReadingRes> responseObserver) {
+    boolean valid = isReadingValid(request.getSensorType(), request.getValue());
+    String message;
 
-        String message = valid ? "Reading is within safe limits." : "Reading is outside safe limits.";
-
-        ValidateReadingRes response = ValidateReadingRes.newBuilder()
-                .setIsValid(valid)
-                .setMessage(message)
-                .build();
-
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+    if (request.getBridgeId().isBlank()) {
+        message = "Bridge ID is required.";
+        valid = false;
+    } else if (request.getSensorId().isBlank()) {
+        message = "Sensor ID is required.";
+        valid = false;
+    } else if (request.getUnit().isBlank()) {
+        message = "Unit is required.";
+        valid = false;
+    } else {
+        switch (request.getSensorType()) {
+            case STRAIN:
+                message = valid
+                        ? "Strain reading is within safe limits."
+                        : "Strain reading is outside safe limits (expected range: 0.0 to 100.0).";
+                break;
+            case VIBRATION:
+                message = valid
+                        ? "Vibration reading is within safe limits."
+                        : "Vibration reading is outside safe limits (expected range: 0.0 to 5.0).";
+                break;
+            case TEMPERATURE:
+                message = valid
+                        ? "Temperature reading is within safe limits."
+                        : "Temperature reading is outside safe limits (expected range: -20.0 to 60.0).";
+                break;
+            case TILT:
+                message = valid
+                        ? "Tilt reading is within safe limits."
+                        : "Tilt reading is outside safe limits (expected range: 0.0 to 15.0).";
+                break;
+            default:
+                valid = false;
+                message = "Sensor type is invalid or unspecified.";
+                break;
+        }
     }
+
+    ValidateReadingRes response = ValidateReadingRes.newBuilder()
+            .setIsValid(valid)
+            .setMessage(message)
+            .build();
+
+    responseObserver.onNext(response);
+    responseObserver.onCompleted();
+}
 
     @Override
     public StreamObserver<UploadReadingsReq> uploadReadings(StreamObserver<UploadReadingsRes> responseObserver) {

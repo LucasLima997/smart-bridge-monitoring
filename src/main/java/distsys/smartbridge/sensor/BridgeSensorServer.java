@@ -8,6 +8,9 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import java.io.IOException;
+import distsys.smartbridge.common.ServerLoggingInterceptor;
+import distsys.smartbridge.common.ClientIdInterceptor;
+import io.grpc.ClientInterceptors;
 
 public class BridgeSensorServer {
 
@@ -17,9 +20,11 @@ public class BridgeSensorServer {
         int port = 50051;
 
         server = ServerBuilder.forPort(port)
-                .addService(new BridgeSensorServiceImpl())
-                .build()
-                .start();
+        .addService(io.grpc.ServerInterceptors.intercept(
+                new BridgeSensorServiceImpl(),
+                new ServerLoggingInterceptor()))
+        .build()
+        .start();
 
         System.out.println("BridgeSensorServer started on port " + port);
 

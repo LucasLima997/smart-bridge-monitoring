@@ -9,6 +9,8 @@ import distsys.smartbridge.grpc.ValidateReadingReq;
 import distsys.smartbridge.grpc.ValidateReadingRes;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import distsys.smartbridge.common.ClientIdInterceptor;
+import io.grpc.ClientInterceptors;
 
 public class BridgeSensorClient {
 
@@ -34,19 +36,24 @@ public class BridgeSensorClient {
             return;
         }
 
-        ManagedChannel serviceChannel = ManagedChannelBuilder
-                .forAddress(serviceInfo.getHost(), serviceInfo.getPort())
-                .usePlaintext()
-                .build();
+      ManagedChannel serviceChannel = ManagedChannelBuilder
+        .forAddress(serviceInfo.getHost(), serviceInfo.getPort())
+        .usePlaintext()
+        .build();
 
-        BridgeSensorServiceGrpc.BridgeSensorServiceBlockingStub blockingStub =
-                BridgeSensorServiceGrpc.newBlockingStub(serviceChannel);
+io.grpc.Channel interceptedChannel = ClientInterceptors.intercept(
+        serviceChannel,
+        new ClientIdInterceptor("sensor-client-gui-test"));
+
+BridgeSensorServiceGrpc.BridgeSensorServiceBlockingStub blockingStub =
+        BridgeSensorServiceGrpc.newBlockingStub(interceptedChannel)
+                .withDeadlineAfter(3, java.util.concurrent.TimeUnit.SECONDS);
 
         ValidateReadingReq request = ValidateReadingReq.newBuilder()
                 .setBridgeId("BR-001")
                 .setSensorId("TEMP-01")
                 .setSensorType(SensorType.TEMPERATURE)
-                .setValue(22.5)
+                .setValue(100.0)
                 .setUnit("C")
                 .build();
 
