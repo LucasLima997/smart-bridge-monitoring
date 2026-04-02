@@ -39,8 +39,9 @@ public class BridgeHealthClient {
                 .build();
 
         BridgeHealthServiceGrpc.BridgeHealthServiceBlockingStub blockingStub =
-                BridgeHealthServiceGrpc.newBlockingStub(serviceChannel);
-
+        BridgeHealthServiceGrpc.newBlockingStub(serviceChannel)
+                .withDeadlineAfter(3, java.util.concurrent.TimeUnit.SECONDS);
+        
         GetHealthStatusReq request = GetHealthStatusReq.newBuilder()
                 .setBridgeId("BR-001")
                 .build();
