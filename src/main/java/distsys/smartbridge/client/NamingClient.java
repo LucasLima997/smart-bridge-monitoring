@@ -5,8 +5,6 @@ import distsys.smartbridge.grpc.DiscoverServiceRes;
 import distsys.smartbridge.grpc.ListServicesReq;
 import distsys.smartbridge.grpc.ListServicesRes;
 import distsys.smartbridge.grpc.NamingServiceGrpc;
-import distsys.smartbridge.grpc.RegisterServiceReq;
-import distsys.smartbridge.grpc.RegisterServiceRes;
 import distsys.smartbridge.grpc.ServiceInfo;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -22,30 +20,51 @@ public class NamingClient {
         NamingServiceGrpc.NamingServiceBlockingStub blockingStub =
                 NamingServiceGrpc.newBlockingStub(channel);
 
-        RegisterServiceReq registerRequest = RegisterServiceReq.newBuilder()
-                .setServiceName("BridgeSensorService")
-                .setHost("localhost")
-                .setPort(50051)
-                .setDescription("Sensor data upload and validation service")
-                .build();
-
-        RegisterServiceRes registerResponse = blockingStub.registerService(registerRequest);
-        System.out.println("Register response: " + registerResponse.getMessage());
-
-        DiscoverServiceReq discoverRequest = DiscoverServiceReq.newBuilder()
-                .setServiceName("BridgeSensorService")
-                .build();
-
-        DiscoverServiceRes discoverResponse = blockingStub.discoverService(discoverRequest);
-        System.out.println("Discovered: " + discoverResponse.getFound());
-        System.out.println("Host: " + discoverResponse.getHost());
-        System.out.println("Port: " + discoverResponse.getPort());
-
         ListServicesRes listResponse = blockingStub.listServices(ListServicesReq.newBuilder().build());
+
         System.out.println("Registered services:");
         for (ServiceInfo service : listResponse.getServicesList()) {
-            System.out.println(service.getServiceName() + " -> " + service.getHost() + ":" + service.getPort());
+            System.out.println("-----------------------------------");
+            System.out.println("Service Name: " + service.getServiceName());
+            System.out.println("Host: " + service.getHost());
+            System.out.println("Port: " + service.getPort());
+            System.out.println("Description: " + service.getDescription());
         }
+
+        System.out.println("-----------------------------------");
+
+        DiscoverServiceRes sensorResponse = blockingStub.discoverService(
+                DiscoverServiceReq.newBuilder()
+                        .setServiceName("BridgeSensorService")
+                        .build()
+        );
+
+        System.out.println("Discover BridgeSensorService:");
+        System.out.println("Found: " + sensorResponse.getFound());
+        System.out.println("Host: " + sensorResponse.getHost());
+        System.out.println("Port: " + sensorResponse.getPort());
+
+        DiscoverServiceRes healthResponse = blockingStub.discoverService(
+                DiscoverServiceReq.newBuilder()
+                        .setServiceName("BridgeHealthService")
+                        .build()
+        );
+
+        System.out.println("Discover BridgeHealthService:");
+        System.out.println("Found: " + healthResponse.getFound());
+        System.out.println("Host: " + healthResponse.getHost());
+        System.out.println("Port: " + healthResponse.getPort());
+
+        DiscoverServiceRes maintenanceResponse = blockingStub.discoverService(
+                DiscoverServiceReq.newBuilder()
+                        .setServiceName("BridgeMaintenanceService")
+                        .build()
+        );
+
+        System.out.println("Discover BridgeMaintenanceService:");
+        System.out.println("Found: " + maintenanceResponse.getFound());
+        System.out.println("Host: " + maintenanceResponse.getHost());
+        System.out.println("Port: " + maintenanceResponse.getPort());
 
         channel.shutdown();
     }
